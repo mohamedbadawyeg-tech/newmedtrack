@@ -3,25 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم مقدم الرعاية - النظام المدمج</title>
+    <title>لوحة تحكم مقدم الرعاية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #764ba2; }
-        .patient-info { background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 30px; text-align: center; }
-        .medication-alert { background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin: 15px 0; display: none; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .notification { background: #e3f2fd; border-right: 5px solid #2196f3; padding: 15px; margin: 10px 0; border-radius: 10px; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
-        .notification-icon { width: 50px; height: 50px; background: #2196f3; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
-        .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; background: #ccc; }
-        .status-dot.online { background-color: #4caf50; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); } }
-        .btn { background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; }
-        #fcm-token-display { background: #f8f9fa; padding: 15px; border-radius: 8px; word-break: break-all; border: 2px dashed #ddd; margin: 10px 0; font-family: monospace; font-size: 0.8rem; }
-        #notifications-container { max-height: 400px; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
-        .empty-state { text-align: center; padding: 40px; color: #888; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #764ba2;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .patient-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .medication-alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .notification {
+            background: #e3f2fd;
+            border-right: 5px solid #2196f3;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            background: #2196f3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-time {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-dot.online {
+            background-color: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        #fcm-token-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+            border: 2px dashed #ddd;
+        }
+        
+        #notifications-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -33,37 +179,59 @@
         
         <div class="patient-info">
             <h2><i class="fas fa-user-injured"></i> المريض: <span id="patient-name">جاري التحميل...</span></h2>
-            <div style="margin-top: 10px;">
-                <div class="status-dot" id="connection-status"></div>
-                <span id="connection-text">جاري الاتصال بالنظام...</span>
-            </div>
+            <p id="patient-status">جاري الاتصال بالنظام...</p>
         </div>
-
+        
+        <div class="status-indicator">
+            <div class="status-dot" id="connection-status"></div>
+            <span id="connection-text">جاري الاتصال...</span>
+        </div>
+        
         <div id="medication-alert" class="medication-alert">
             <h3><i class="fas fa-bell"></i> تنبيه جديد!</h3>
             <p id="alert-message"></p>
         </div>
-
+        
         <div class="notification-settings">
-            <h3><i class="fas fa-cog"></i> إعدادات الإشعارات (FCM)</h3>
-            <div id="fcm-token-display">جاري توليد الرمز...</div>
-            <button class="btn" onclick="copyToken()"><i class="fas fa-copy"></i> نسخ الرمز للمريض</button>
-        </div>
-
-        <div class="notification-history" style="margin-top: 30px;">
-            <h3><i class="fas fa-history"></i> سجل الإشعارات الحية</h3>
-            <div id="notifications-container">
-                <div class="empty-state">لا توجد إشعارات حتى الآن.</div>
+            <h3><i class="fas fa-cog"></i> إعدادات الإشعارات</h3>
+            <div id="fcm-token-box">
+                <p><strong>رمز FCM الخاص بك:</strong></p>
+                <div id="fcm-token-display">جاري توليد الرمز...</div>
+                <p class="instructions">شارك هذا الرمز مع المريض ليتمكن من إرسال الإشعارات لك</p>
+                <button class="btn" id="copy-token-btn">
+                    <i class="fas fa-copy"></i> نسخ الرمز
+                </button>
             </div>
-            <button class="btn" style="background:#f44336; margin-top:10px;" onclick="clearHistory()">مسح السجل</button>
+        </div>
+        
+        <div class="notification-history">
+            <h3><i class="fas fa-history"></i> سجل الإشعارات</h3>
+            <div id="notifications-container">
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>لا توجد إشعارات حتى الآن</p>
+                    <p>سيظهر سجل الإشعارات هنا عند وصولها</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" id="test-notification-btn">
+                <i class="fas fa-bell"></i> اختبار استقبال الإشعارات
+            </button>
+            <button class="btn" id="clear-notifications-btn" style="background: #f44336;">
+                <i class="fas fa-trash"></i> مسح السجل
+            </button>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
-
+    
     <script>
+        // ⚠️ استبدل هذا التكوين بمعلومات مشروعك من Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMJjeucsuWiIrOKJ19AK6VT9zLS7ZB6MY",
             authDomain: "medtrackmamdouh.firebaseapp.com",
@@ -73,44 +241,362 @@
             appId: "1:588115249832:web:1e8a2f5dd57db68047909d"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        // تهيئة Firebase
+        const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const messaging = firebase.messaging();
-        const VAPID_KEY = "BAHsKe2WSUDaXMcroeNScTprRmE2NTIBDyv9fYmVsuUddhERvybIKM7EBNgSHnuZ91Q9QU9V034IXnVDbeEG9oQ";
+        let messaging;
+        
+        // بيانات التطبيق
+        const appData = {
+            fcmToken: "",
+            notifications: [],
+            patientId: "patient_001", // معرف المريض (تغييره إذا كان مختلفاً)
+            patientName: "المريض",
+            isConnected: false
+        };
 
-        async function initCaregiver() {
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
+                await initializeFirebase();
+                setupNotificationListeners();
+                loadNotifications();
+                setupButtons();
+                checkConnection();
+                
+                console.log('✅ لوحة مقدم الرعاية جاهزة');
+            } catch (error) {
+                console.error('❌ خطأ في التهيئة:', error);
+                showAlert('خطأ في التهيئة', 'error');
+            }
+        });
+
+        // تهيئة Firebase و Cloud Messaging
+        async function initializeFirebase() {
+            try {
+                // التحقق من دعم FCM
+                if (!firebase.messaging.isSupported()) {
+                    throw new Error('المتصفح لا يدعم الإشعارات');
+                }
+                
+                messaging = firebase.messaging();
+                
+                // طلب إذن الإشعارات
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') {
-                    alert("يرجى تفعيل الإشعارات لتتمكن من مراقبة المريض.");
-                    return;
+                    throw new Error('تم رفض إذن الإشعارات');
                 }
-
-                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+                
+                // الحصول على رمز FCM
+                const token = await messaging.getToken({
+                    vapidKey: 'BAHsKe2WSUDaXMcroeNScTprRmE2NTIBDyv9fYmVsuUddhERvybIKM7EBNgSHnuZ91Q9QU9V034IXnVDbeEG9oQ'
+                });
+                
                 if (token) {
+                    appData.fcmToken = token;
                     document.getElementById('fcm-token-display').textContent = token;
-                    // تحديث بيانات مقدم الرعاية في Firestore
-                    await db.collection('caregivers').doc('caregiver_001').set({
-                        token: token,
-                        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: "online"
-                    }, { merge: true });
-
-                    startListening(token);
-                    updateUIStatus(true);
-                    loadPatientData();
+                    await saveCaregiverToken(token);
+                    
+                    console.log('✅ تم الحصول على رمز FCM:', token.substring(0, 50) + '...');
+                    showAlert('تم تفعيل الإشعارات بنجاح!', 'success');
                 }
-            } catch (err) {
-                console.error("Initialization Error:", err);
-                updateUIStatus(false);
+                
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة الإشعارات:', error);
+                document.getElementById('fcm-token-display').textContent = 'خطأ: ' + error.message;
             }
         }
 
-        function startListening(token) {
-            // الاستماع للإشعارات الموجهة لهذا الـ Token
+        // حفظ رمز مقدم الرعاية في Firebase
+        async function saveCaregiverToken(token) {
+            try {
+                await db.collection('caregivers').doc('caregiver_001').set({
+                    token: token,
+                    patientId: appData.patientId,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                console.log('✅ تم حفظ رمز مقدم الرعاية');
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الرمز:', error);
+            }
+        }
+
+        // إعداد مستمعي الإشعارات
+        function setupNotificationListeners() {
+            // مستمع للإشعارات الواردة أثناء تشغيل التطبيق
+            messaging.onMessage((payload) => {
+                console.log('📱 إشعار ورد أثناء تشغيل التطبيق:', payload);
+                handleIncomingNotification(payload);
+            });
+            
+            // مستمع للتغييرات في Firestore (الإشعارات الجديدة)
             db.collection('notifications')
-                .where('to', '==', token)
+                .where('to', '==', appData.fcmToken)
                 .orderBy('sentAt', 'desc')
-                .limit(20)
-                .onSnapshot(snapshot => {
-                    if (snapshot.empty) return;
+                .limit(10)
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const notification = change.doc.data();
+                            handleIncomingNotification({
+                                notification: notification.notification,
+                                data: notification.data
+                            });
+                        }
+                    });
+                });
+        }
+
+        // معالجة الإشعار الوارد
+        function handleIncomingNotification(payload) {
+            const title = payload.notification?.title || 'إشعار جديد';
+            const body = payload.notification?.body || 'تم أخذ دواء جديد';
+            const medication = payload.data?.medication || 'دواء غير معروف';
+            const time = payload.data?.time || new Date().toLocaleTimeString();
+            
+            // عرض تنبيه في الصفحة
+            showMedicationAlert(medication, time, body);
+            
+            // إضافة إلى سجل الإشعارات
+            addNotificationToHistory(title, body, medication, time);
+            
+            // إظهار إشعار النظام
+            showSystemNotification(title, body);
+            
+            // تشغيل صوت التنبيه (اختياري)
+            playNotificationSound();
+        }
+
+        // عرض تنبيه في الصفحة
+        function showMedicationAlert(medication, time, message) {
+            const alertDiv = document.getElementById('medication-alert');
+            const messageElement = document.getElementById('alert-message');
+            
+            messageElement.innerHTML = `
+                <strong>${medication}</strong><br>
+                <small>الوقت: ${time}</small><br>
+                ${message}
+            `;
+            
+            alertDiv.style.display = 'block';
+            
+            // إخفاء التنبيه بعد 10 ثوانٍ
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 10000);
+        }
+
+        // إضافة إشعار إلى السجل
+        function addNotificationToHistory(title, body, medication, time) {
+            const notification = {
+                id: Date.now(),
+                title: title,
+                body: body,
+                medication: medication,
+                time: time,
+                timestamp: new Date().toISOString()
+            };
+            
+            appData.notifications.unshift(notification);
+            
+            // حفظ محلي
+            localStorage.setItem('caregiverNotifications', JSON.stringify(appData.notifications));
+            
+            // تحديث العرض
+            updateNotificationsDisplay();
+        }
+
+        // تحديث عرض الإشعارات
+        function updateNotificationsDisplay() {
+            const container = document.getElementById('notifications-container');
+            
+            if (appData.notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>لا توجد إشعارات حتى الآن</p>
+                        <p>سيظهر سجل الإشعارات هنا عند وصولها</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            appData.notifications.forEach(notification => {
+                html += `
+                    <div class="notification">
+                        <div class="notification-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <div class="notification-content">
+                            <strong>${notification.title}</strong>
+                            <p>${notification.body}</p>
+                            <div class="notification-time">
+                                <i class="far fa-clock"></i> ${notification.time}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // تحميل الإشعارات المحفوظة
+        function loadNotifications() {
+            const saved = localStorage.getItem('caregiverNotifications');
+            if (saved) {
+                try {
+                    appData.notifications = JSON.parse(saved);
+                    updateNotificationsDisplay();
+                } catch (error) {
+                    console.error('❌ خطأ في تحميل الإشعارات:', error);
+                }
+            }
+        }
+
+        // إظهار إشعار النظام
+        function showSystemNotification(title, body) {
+            if (!("Notification" in window)) return;
+            
+            if (Notification.permission === "granted") {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/206/206875.png',
+                    requireInteraction: true,
+                    tag: 'medication-notification'
+                });
+                
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+            }
+        }
+
+        // تشغيل صوت التنبيه
+        function playNotificationSound() {
+            try {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+                audio.volume = 0.3;
+                audio.play();
+            } catch (error) {
+                console.log('❌ تعذر تشغيل الصوت');
+            }
+        }
+
+        // التحقق من الاتصال
+        function checkConnection() {
+            const statusDot = document.getElementById('connection-status');
+            const statusText = document.getElementById('connection-text');
+            
+            if (navigator.onLine) {
+                statusDot.className = 'status-dot online';
+                statusText.textContent = 'متصل - جاهز لتلقي الإشعارات';
+                appData.isConnected = true;
+            } else {
+                statusDot.className = 'status-dot';
+                statusText.textContent = 'غير متصل بالإنترنت';
+                appData.isConnected = false;
+            }
+        }
+
+        // إعداد الأزرار
+        function setupButtons() {
+            // نسخ الرمز
+            document.getElementById('copy-token-btn').addEventListener('click', function() {
+                navigator.clipboard.writeText(appData.fcmToken)
+                    .then(() => {
+                        showAlert('تم نسخ الرمز إلى الحافظة', 'success');
+                    })
+                    .catch(() => {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = appData.fcmToken;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        showAlert('تم نسخ الرمز', 'success');
+                    });
+            });
+            
+            // اختبار الإشعارات
+            document.getElementById('test-notification-btn').addEventListener('click', function() {
+                showMedicationAlert(
+                    'اختبار الدواء',
+                    new Date().toLocaleTimeString(),
+                    'هذا إشعار اختبار للتأكد من عمل النظام'
+                );
+                
+                addNotificationToHistory(
+                    'اختبار النظام',
+                    'تم اختبار استقبال الإشعارات بنجاح',
+                    'دواء تجريبي',
+                    new Date().toLocaleTimeString()
+                );
+                
+                showSystemNotification('اختبار النظام', 'تم اختبار الإشعارات بنجاح');
+            });
+            
+            // مسح السجل
+            document.getElementById('clear-notifications-btn').addEventListener('click', function() {
+                if (confirm('هل تريد مسح سجل الإشعارات؟')) {
+                    appData.notifications = [];
+                    localStorage.removeItem('caregiverNotifications');
+                    updateNotificationsDisplay();
+                    showAlert('تم مسح سجل الإشعارات', 'success');
+                }
+            });
+        }
+
+        // عرض رسالة تنبيه
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : '#2196f3'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                animation: fadeIn 0.3s;
+            `;
+            alertDiv.textContent = message;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-10px)';
+                setTimeout(() => document.body.removeChild(alertDiv), 300);
+            }, 3000);
+        }
+
+        // تحديث معلومات المريض من Firestore
+        function updatePatientInfo() {
+            db.collection('patients').doc(appData.patientId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const patientData = doc.data();
+                        appData.patientName = patientData.patientName || 'المريض';
+                        
+                        document.getElementById('patient-name').textContent = appData.patientName;
+                        document.getElementById('patient-status').textContent = 
+                            `متصل - ${Object.keys(patientData.medications || {}).length} دواء تم أخذه اليوم`;
+                    }
+                });
+        }
+
+        // الاستماع لتغييرات حالة الاتصال
+        window.addEventListener('online', checkConnection);
+        window.addEventListener('offline', checkConnection);
+
+        // تحميل معلومات المريض
+        updatePatientInfo();
+    </script>
+</body>
+</html>
