@@ -868,6 +868,28 @@
             gap: 5px;
             margin-top: 5px;
         }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1334,6 +1356,9 @@
                         <button class="btn btn-warning" id="mark-all-taken"><i class="fas fa-check-double"></i> تعليم الكل كمأخوذ</button>
                         <button class="btn btn-ai" id="analyze-with-ai"><i class="fas fa-robot"></i> تحليل الحالة بالذكاء الاصطناعي</button>
                         <button class="btn btn-notification" id="send-test-notification"><i class="fas fa-bell"></i> اختبار الإشعارات</button>
+                        <button class="btn" id="test-notification-local">
+                            <i class="fas fa-bell"></i> اختبار الإشعار المحلي
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1600,6 +1625,66 @@
             }
         };
         
+        // إعداد مستمعات Firebase
+        function setupFirebaseListeners() {
+            if (!messaging) return;
+            
+            try {
+                // مستمع لاستلام الإشعارات أثناء فتح التطبيق
+                messaging.onMessage((payload) => {
+                    console.log('📬 تم استلام إشعار أثناء فتح التطبيق:', payload);
+                    
+                    // عرض الإشعار في التطبيق
+                    if (payload.notification) {
+                        showNotification(payload.notification.title, payload.notification.body, 'success');
+                    }
+                    
+                    // تحديث الواجهة إذا كان هناك رسالة بيانات
+                    if (payload.data) {
+                        if (payload.data.type === 'medication_reminder') {
+                            // تحديث التذكيرات
+                            updateReminders();
+                            
+                            // عرض تنبيه
+                            const notificationEl = document.getElementById('next-reminder');
+                            if (notificationEl) {
+                                notificationEl.style.display = 'block';
+                                notificationEl.innerHTML = `
+                                    <i class="fas fa-bell"></i> ${payload.data.medication} 
+                                    <span style="font-size: 0.9em;">(${payload.data.time})</span>
+                                    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:white;margin-left:10px;cursor:pointer;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                `;
+                            }
+                        }
+                    }
+                });
+                
+                // مستمع لتحديث رمز FCM
+                messaging.onTokenRefresh(() => {
+                    console.log('🔄 جاري تحديث رمز FCM...');
+                    messaging.getToken().then((newToken) => {
+                        if (newToken) {
+                            console.log('✅ تم تحديث رمز FCM');
+                            appData.fcmToken = newToken;
+                            const shortToken = newToken.substring(0, 30) + '...';
+                            document.getElementById('fcm-token-short').textContent = shortToken;
+                            document.getElementById('fcm-token-preview').textContent = shortToken;
+                            savePatientToken(newToken);
+                        }
+                    }).catch((err) => {
+                        console.error('❌ خطأ في تحديث رمز FCM:', err);
+                    });
+                });
+                
+                console.log('✅ تم إعداد مستمعات Firebase بنجاح');
+                
+            } catch (error) {
+                console.error('❌ خطأ في إعداد مستمعات Firebase:', error);
+            }
+        }
+        
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -1662,6 +1747,7 @@
                     showNotification('تم التهيئة', 'تم تفعيل الإشعارات بنجاح!', 'success');
                 }
                 
+                // إعداد مستمعات Firebase هنا
                 setupFirebaseListeners();
                 
             } catch (error) {
@@ -2425,6 +2511,20 @@
             document.getElementById('send-test-notification').addEventListener('click', sendTestNotification);
             document.getElementById('setup-notifications').addEventListener('click', setupNotifications);
             document.getElementById('save-caregiver-token').addEventListener('click', saveCaregiverToken);
+            
+            // زر اختبار الإشعار المحلي
+            document.getElementById('test-notification-local')?.addEventListener('click', function() {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('اختبار الإشعار', {
+                        body: 'هذا إشعار اختبار من نظام متابعة الأدوية',
+                        icon: '/favicon.ico',
+                        tag: 'test-notification'
+                    });
+                    showNotification('تم الاختبار', 'تم إرسال إشعار اختبار محلي', 'success');
+                } else {
+                    showNotification('تنبيه', 'يجب تفعيل الإشعارات أولاً', 'warning');
+                }
+            });
             
             // أزرار الإشعارات الجماعية
             document.querySelectorAll('.send-notification-btn').forEach(btn => {
