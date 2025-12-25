@@ -17,12 +17,15 @@
             --purple: #9b59b6;
             --orange: #e67e22;
             --notification: #ff9800;
-            --caregiver: #9b59b6;
             --health: #1abc9c;
             --pain: #e74c3c;
             --sleep: #3498db;
             --appetite: #f39c12;
             --ai: #9b59b6;
+            --morning: #f39c12;
+            --afternoon: #e67e22;
+            --evening: #8e44ad;
+            --night: #34495e;
         }
         
         * {
@@ -147,10 +150,25 @@
             background: #f8fafc;
             padding: 20px;
             border-radius: 10px;
-            border-right: 5px solid var(--primary);
             position: relative;
             animation: slideInRight 0.5s ease forwards;
             opacity: 0;
+        }
+        
+        .time-slot.morning {
+            border-right: 5px solid var(--morning);
+        }
+        
+        .time-slot.afternoon {
+            border-right: 5px solid var(--afternoon);
+        }
+        
+        .time-slot.evening {
+            border-right: 5px solid var(--evening);
+        }
+        
+        .time-slot.night {
+            border-right: 5px solid var(--night);
         }
         
         @keyframes slideInRight {
@@ -158,16 +176,6 @@
                 opacity: 1;
                 transform: translateX(0);
             }
-        }
-        
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes slideOutRight {
-            from { opacity: 1; transform: translateX(0); }
-            to { opacity: 0; transform: translateX(20px); }
         }
         
         .time-title {
@@ -182,8 +190,13 @@
         }
         
         .time-title i {
-            color: var(--primary);
+            color: inherit;
         }
+        
+        .time-title.morning i { color: var(--morning); }
+        .time-title.afternoon i { color: var(--afternoon); }
+        .time-title.evening i { color: var(--evening); }
+        .time-title.night i { color: var(--night); }
         
         .medication-item {
             display: flex;
@@ -221,6 +234,9 @@
             font-weight: bold;
             font-size: 1.1rem;
             color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .med-dosage {
@@ -291,6 +307,11 @@
             border-right: 3px solid var(--danger) !important;
         }
         
+        .warning-icon {
+            color: var(--warning);
+            font-size: 0.9rem;
+        }
+        
         .warning-box {
             background: #fff3e0;
             border-right: 4px solid #ff9800;
@@ -341,7 +362,9 @@
         }
         
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: var(--primary);
             color: white;
             border: none;
@@ -549,7 +572,14 @@
         
         .medication-item.checked { background-color: rgba(46, 204, 113, 0.05); }
         
-        .notification-time { color: var(--notification); font-weight: bold; font-size: 0.9rem; }
+        .notification-time { 
+            color: var(--notification); 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
         
         .next-reminder {
             background: linear-gradient(135deg, var(--notification), #ff9800);
@@ -824,6 +854,20 @@
             70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
             100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
+        
+        .medication-group-btn {
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .time-warning {
+            font-size: 0.8rem;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -869,24 +913,50 @@
             <i class="fas fa-bell"></i> التذكير القادم: <span id="next-reminder-time">--:--</span> - <span id="next-reminder-med">لا توجد تذكيرات</span>
         </div>
         
-        <div class="dashboard">
-            <div class="medication-section">
-                <h2><i class="fas fa-calendar-check"></i> جدول الأدوية اليومي</h2>
-                
-                <div class="danger-box">
-                    <h3><i class="fas fa-exclamation-triangle"></i> تنبيهات أمنية حرجة</h3>
+        <!-- تنبيهات أمنية حرجة -->
+        <div class="critical-info">
+            <h3><i class="fas fa-exclamation-triangle"></i> تنبيهات أمنية حرجة - خط أحمر ⚠️</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div>
+                    <strong>Eliquis + Plavix معاً:</strong>
                     <ul>
-                        <li><strong>Eliquis + Plavix:</strong> ممنوع نسيان أو إوقف بدون طبيب</li>
-                        <li>لو في دوخة شديدة / هبوط / نزيف → طوارئ فورًا</li>
-                        <li>Moxiflox: يتاخد في نفس المعاد يوميًا بعيد عن اللبن</li>
-                        <li>Forxiga: اشرب مياه كويس وراقب السكر</li>
+                        <li>ممنوع نسيان أو إيقاف بدون طبيب</li>
+                        <li>خطر نزيف مرتفع جداً</li>
+                        <li>لو في نزيف → طوارئ فورًا</li>
                     </ul>
                 </div>
+                <div>
+                    <strong>Moxiflox:</strong>
+                    <ul>
+                        <li>يتاخد في نفس المعاد يوميًا</li>
+                        <li>بعيد عن اللبن بساعتين على الأقل</li>
+                        <li>لمدة 5 أيام فقط</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>Forxiga:</strong>
+                    <ul>
+                        <li>اشرب مياه كويس (2-3 لتر يومياً)</li>
+                        <li>راقب السكر باستمرار</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="medication-section">
+                <h2><i class="fas fa-calendar-check"></i> جدول الأدوية اليومي الكامل</h2>
                 
-                <div class="time-slot" data-time="morning-fasting" data-hour="7" data-minute="0">
-                    <div class="time-title">
-                        <i class="fas fa-sun"></i> الصباح على الريق
-                        <span class="notification-time">⏰ 7:00 صباحاً</span>
+                <!-- الصباح على الريق - 7:00 صباحاً -->
+                <div class="time-slot morning" data-time="morning-fasting" data-hour="7" data-minute="0">
+                    <div class="time-title morning">
+                        <div>
+                            <i class="fas fa-sun"></i> الصباح على الريق
+                            <span class="notification-time"><i class="far fa-clock"></i> 7:00 صباحاً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="morning-fasting" data-group="أدوية الصباح على الريق">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
                     </div>
                     
                     <div class="medication-item" data-med="Examide">
@@ -938,10 +1008,16 @@
                     </div>
                 </div>
                 
-                <div class="time-slot" data-time="after-breakfast" data-hour="9" data-minute="0">
-                    <div class="time-title">
-                        <i class="fas fa-coffee"></i> بعد الفطار
-                        <span class="notification-time">⏰ 9:00 صباحاً</span>
+                <!-- بعد الفطار - 9:00 صباحاً -->
+                <div class="time-slot morning" data-time="after-breakfast" data-hour="9" data-minute="0">
+                    <div class="time-title morning">
+                        <div>
+                            <i class="fas fa-coffee"></i> بعد الفطار
+                            <span class="notification-time"><i class="far fa-clock"></i> 9:00 صباحاً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="after-breakfast" data-group="أدوية بعد الفطار">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
                     </div>
                     
                     <div class="medication-item" data-med="Aldomet">
@@ -949,28 +1025,270 @@
                             <div class="med-name">Aldomet 250 mg</div>
                             <div class="med-dosage">قرصين</div>
                             <div class="med-notes">الجرعة الأولى - سيتم تكرارها كل 8 ساعات</div>
+                            <div class="time-warning">
+                                <i class="fas fa-clock"></i> التالية: 5:00 عصراً
+                            </div>
                         </div>
                         <div class="checkbox-container">
                             <input type="checkbox" class="med-checkbox" id="med-aldomet-1" data-med="Aldomet" data-time="after-breakfast">
                             <span class="checkmark"></span>
                         </div>
                     </div>
+                    
+                    <div class="medication-item critical-med" data-med="Eliquis">
+                        <div class="medication-info">
+                            <div class="med-name">Eliquis 2.5 mg <span class="warning-icon">⚠️</span></div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">مميع للدم - الجرعة الصباحية (سيتم تكرارها مساءً)</div>
+                            <div class="time-warning">
+                                <i class="fas fa-exclamation-triangle"></i> خط أحمر - مع Plavix
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-eliquis-morning" data-med="Eliquis" data-time="after-breakfast">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Acetyl Cysteine">
+                        <div class="medication-info">
+                            <div class="med-name">Acetyl Cysteine</div>
+                            <div class="med-dosage">كيس واحد</div>
+                            <div class="med-notes">مذيب للبلغم - الجرعة الصباحية</div>
+                            <div class="time-warning">
+                                <i class="fas fa-clock"></i> التالية: 10:00 مساءً
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-acetyl-morning" data-med="Acetyl Cysteine" data-time="after-breakfast">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="time-slot" data-time="before-bed" data-hour="22" data-minute="0">
-                    <div class="time-title">
-                        <i class="fas fa-moon"></i> قبل النوم
-                        <span class="notification-time">⏰ 10:00 مساءً</span>
+                <!-- قبل الغداء - 1:00 ظهراً -->
+                <div class="time-slot afternoon" data-time="before-lunch" data-hour="13" data-minute="0">
+                    <div class="time-title afternoon">
+                        <div>
+                            <i class="fas fa-utensils"></i> قبل الغداء
+                            <span class="notification-time"><i class="far fa-clock"></i> 1:00 ظهراً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="before-lunch" data-group="أدوية قبل الغداء">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Forxiga">
+                        <div class="medication-info">
+                            <div class="med-name">Forxiga 10 mg</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">لسكري النوع الثاني - اشرب مياه كافية</div>
+                            <div class="time-warning">
+                                <i class="fas fa-tint"></i> اشرب 2-3 لتر مياه يومياً
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-forxiga" data-med="Forxiga" data-time="before-lunch">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- بعد الغداء - 3:00 عصراً -->
+                <div class="time-slot afternoon" data-time="after-lunch" data-hour="15" data-minute="0">
+                    <div class="time-title afternoon">
+                        <div>
+                            <i class="fas fa-coffee"></i> بعد الغداء
+                            <span class="notification-time"><i class="far fa-clock"></i> 3:00 عصراً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="after-lunch" data-group="أدوية بعد الغداء">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Suprax">
+                        <div class="medication-info">
+                            <div class="med-name">Suprax 200 mg</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">مضاد حيوي - لمدة أسبوع فقط</div>
+                            <div class="time-warning">
+                                <i class="fas fa-calendar"></i> اكمل الجرعة لمدة أسبوع
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-suprax" data-med="Suprax" data-time="after-lunch">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Suprax Suspension">
+                        <div class="medication-info">
+                            <div class="med-name">Suprax Suspension</div>
+                            <div class="med-dosage">٣ سم</div>
+                            <div class="med-notes">بعد الغداء - لمدة أسبوع</div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-suprax-susp" data-med="Suprax Suspension" data-time="after-lunch">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- العصر - 5:00 عصراً -->
+                <div class="time-slot afternoon" data-time="afternoon" data-hour="17" data-minute="0">
+                    <div class="time-title afternoon">
+                        <div>
+                            <i class="fas fa-cloud-sun"></i> العصر
+                            <span class="notification-time"><i class="far fa-clock"></i> 5:00 عصراً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="afternoon" data-group="أدوية العصر">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Eraloner">
+                        <div class="medication-info">
+                            <div class="med-name">Eraloner 25 mg</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">مضاد للاكتئاب/القلق</div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-eraloner" data-med="Eraloner" data-time="afternoon">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Aldomet">
+                        <div class="medication-info">
+                            <div class="med-name">Aldomet 250 mg</div>
+                            <div class="med-dosage">قرصين</div>
+                            <div class="med-notes">جرعة منتصف اليوم (بعد 8 ساعات من الصباح)</div>
+                            <div class="time-warning">
+                                <i class="fas fa-clock"></i> التالية: 10:00 مساءً
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-aldomet-2" data-med="Aldomet" data-time="afternoon">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- الساعة 6 مساءً -->
+                <div class="time-slot evening" data-time="6pm" data-hour="18" data-minute="0">
+                    <div class="time-title evening">
+                        <div>
+                            <i class="fas fa-clock"></i> الساعة 6 مساءً
+                            <span class="notification-time"><i class="far fa-clock"></i> 6:00 مساءً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="6pm" data-group="أدوية الساعة 6 مساءً">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Cardura">
+                        <div class="medication-info">
+                            <div class="med-name">Cardura 4 mg</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">لضغط الدم</div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-cardura" data-med="Cardura" data-time="6pm">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- بعد العشاء - 8:00 مساءً -->
+                <div class="time-slot evening" data-time="after-dinner" data-hour="20" data-minute="0">
+                    <div class="time-title evening">
+                        <div>
+                            <i class="fas fa-moon"></i> بعد العشاء
+                            <span class="notification-time"><i class="far fa-clock"></i> 8:00 مساءً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="after-dinner" data-group="أدوية بعد العشاء">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
+                    </div>
+                    
+                    <div class="medication-item critical-med" data-med="Plavix">
+                        <div class="medication-info">
+                            <div class="med-name">Plavix 75 mg <span class="warning-icon">⚠️</span></div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">مميع للدم - مع Eliquis (خطر نزيف مرتفع)</div>
+                            <div class="time-warning">
+                                <i class="fas fa-exclamation-triangle"></i> خط أحمر - لا تنسى أبداً
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-plavix" data-med="Plavix" data-time="after-dinner">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Lipitor">
+                        <div class="medication-info">
+                            <div class="med-name">Lipitor 40 mg</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">لخفض الكوليسترول</div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-lipitor" data-med="Lipitor" data-time="after-dinner">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Moxiflox">
+                        <div class="medication-info">
+                            <div class="med-name">Moxiflox</div>
+                            <div class="med-dosage">قرص واحد</div>
+                            <div class="med-notes">مرة كل 24 ساعة - لمدة 5 أيام - بعيد عن اللبن</div>
+                            <div class="time-warning">
+                                <i class="fas fa-exclamation-triangle"></i> بعيد عن اللبن بساعتين
+                            </div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-moxiflox" data-med="Moxiflox" data-time="after-dinner">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="medication-item" data-med="Spiriva">
+                        <div class="medication-info">
+                            <div class="med-name">Spiriva 18 mcg</div>
+                            <div class="med-dosage">بخة واحدة</div>
+                            <div class="med-notes">بخاخة استنشاق</div>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="med-checkbox" id="med-spiriva" data-med="Spiriva" data-time="after-dinner">
+                            <span class="checkmark"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- قبل النوم - 10:00 مساءً -->
+                <div class="time-slot night" data-time="before-bed" data-hour="22" data-minute="0">
+                    <div class="time-title night">
+                        <div>
+                            <i class="fas fa-bed"></i> قبل النوم
+                            <span class="notification-time"><i class="far fa-clock"></i> 10:00 مساءً</span>
+                        </div>
+                        <button class="send-notification-btn" data-time="before-bed" data-group="أدوية قبل النوم">
+                            <i class="fas fa-bell"></i> إرسال إشعار للمراقب عن هذه المجموعة
+                        </button>
                     </div>
                     
                     <div class="medication-item critical-med" data-med="Eliquis">
                         <div class="medication-info">
-                            <div class="med-name">Eliquis 2.5 mg ⚠️</div>
+                            <div class="med-name">Eliquis 2.5 mg <span class="warning-icon">⚠️</span></div>
                             <div class="med-dosage">قرص واحد</div>
                             <div class="med-notes">الجرعة المسائية (بعد 12 ساعة من الصباح)</div>
+                            <div class="time-warning">
+                                <i class="fas fa-exclamation-triangle"></i> خط أحمر - مع Plavix
+                            </div>
                         </div>
                         <div class="checkbox-container">
-                            <input type="checkbox" class="med-checkbox" id="med-eliquis-2" data-med="Eliquis" data-time="before-bed">
+                            <input type="checkbox" class="med-checkbox" id="med-eliquis-night" data-med="Eliquis" data-time="before-bed">
                             <span class="checkmark"></span>
                         </div>
                     </div>
@@ -1000,14 +1318,15 @@
                     </div>
                 </div>
                 
+                <!-- ملخص اليوم -->
                 <div class="progress-section">
                     <h3><i class="fas fa-chart-line"></i> تقدم اليوم</h3>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill"></div>
                     </div>
                     <div class="progress-text">
-                        <span>الأدوية المأخوذة: <span id="taken-count-display">0</span></span>
-                        <span>الأدوية المتبقية: <span id="remaining-count-display">0</span></span>
+                        <span>الأدوية المأخوذة: <span id="taken-count-display">0</span>/<span id="total-count-display">0</span></span>
+                        <span>نسبة الالتزام: <span id="compliance-percent">0%</span></span>
                     </div>
                     <div class="button-group">
                         <button class="btn btn-success" id="reset-day"><i class="fas fa-redo"></i> بدء يوم جديد</button>
@@ -1019,6 +1338,7 @@
                 </div>
             </div>
             
+            <!-- التقويم الصحي -->
             <div class="calendar-section">
                 <h2><i class="fas fa-calendar-day"></i> التقويم الصحي اليومي</h2>
                 
@@ -1073,11 +1393,13 @@
                     <button class="btn btn-health" id="save-daily-calendar"><i class="fas fa-calendar-check"></i> حفظ التقويم اليومي</button>
                 </div>
                 
+                <!-- تحليل الذكاء الاصطناعي -->
                 <div class="ai-analysis-box" id="ai-analysis-box">
                     <h3><i class="fas fa-robot"></i> تحليل الذكاء الاصطناعي</h3>
                     <div id="ai-analysis-result"></div>
                 </div>
                 
+                <!-- سجل المتابعات -->
                 <div class="history-section">
                     <h3><i class="fas fa-history"></i> سجل متابعتي</h3>
                     <div id="history-list">
@@ -1090,6 +1412,7 @@
                 </div>
             </div>
             
+            <!-- المعلومات والإعدادات -->
             <div class="sidebar">
                 <h2><i class="fas fa-user"></i> معلوماتي وإعداداتي</h2>
                 
@@ -1105,14 +1428,19 @@
                     </div>
                 </div>
                 
+                <!-- ملخص الأدوية المتكررة -->
                 <div class="repeated-meds">
-                    <h4><i class="fas fa-history"></i> أدوية متكررة</h4>
-                    <p><strong>Aldomet:</strong> 2 قرص كل 8 ساعات (3 مرات يوميًا)</p>
-                    <p><strong>Eliquis:</strong> قرص كل 12 ساعة</p>
-                    <p><strong>Acetyl Cysteine:</strong> كيس كل 12 ساعة</p>
+                    <h4><i class="fas fa-history"></i> ملخص الأدوية المتكررة</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p><strong>Aldomet 250 mg:</strong> 3 مرات يومياً (9:00 ص, 5:00 م, 10:00 م)</p>
+                        <p><strong>Eliquis 2.5 mg:</strong> 2 مرات يومياً (9:00 ص, 10:00 م) ⚠️</p>
+                        <p><strong>Acetyl Cysteine:</strong> 2 مرات يومياً (9:00 ص, 10:00 م)</p>
+                        <p><strong>Moxiflox:</strong> مرة يومياً (8:00 م) - لمدة 5 أيام فقط</p>
+                    </div>
                 </div>
                 
-                <div class="notification-box">
+                <!-- إعدادات Firebase -->
+                <div class="notification-box" style="margin-top: 20px;">
                     <h4><i class="fas fa-bell"></i> إعدادات Firebase</h4>
                     <div id="firebase-info">
                         <div class="alert alert-notification">
@@ -1133,6 +1461,7 @@
                     </div>
                 </div>
                 
+                <!-- أزرار التحكم -->
                 <div class="button-group" style="margin-top: 20px;">
                     <button class="btn btn-warning" id="clear-history"><i class="fas fa-trash-alt"></i> مسح السجل</button>
                     <button class="btn" id="export-data"><i class="fas fa-download"></i> تصدير بياناتي</button>
@@ -1156,7 +1485,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
     
     <script>
-        // تكوين Firebase - استبدل بمعلومات مشروعك
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAMJjeucsuWiIrOKJ19AK6VT9zLS7ZB6MY",
             authDomain: "medtrackmamdouh.firebaseapp.com",
@@ -1170,7 +1499,6 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let messaging;
-        let currentUser = null;
         
         // بيانات التطبيق
         const appData = {
@@ -1197,16 +1525,80 @@
             firebaseConnected: false
         };
         
-        // جميع الأدوية
+        // جميع الأدوية مع تفاصيلها الكاملة
         const allMedications = [
-            { id: 'med-examide', name: 'Examide', time: 'morning-fasting', critical: false },
-            { id: 'med-norvasc', name: 'Norvasc', time: 'morning-fasting', critical: false },
-            { id: 'med-contorloc', name: 'Contorloc', time: 'morning-fasting', critical: false },
-            { id: 'med-corvid', name: 'Corvid', time: 'morning-fasting', critical: false },
-            { id: 'med-aldomet-1', name: 'Aldomet', time: 'after-breakfast', critical: false },
-            { id: 'med-eliquis-2', name: 'Eliquis', time: 'before-bed', critical: true },
-            { id: 'med-acetyl-night', name: 'Acetyl Cysteine', time: 'before-bed', critical: false }
+            // الصباح على الريق - 7:00 صباحاً
+            { id: 'med-examide', name: 'Examide', time: 'morning-fasting', hour: 7, minute: 0, dosage: 'قرص واحد', notes: 'مدر للبول - على معدة فارغة', critical: false },
+            { id: 'med-norvasc', name: 'Norvasc', time: 'morning-fasting', hour: 7, minute: 0, dosage: 'قرص واحد', notes: 'لضغط الدم - على الريق', critical: false },
+            { id: 'med-contorloc', name: 'Contorloc', time: 'morning-fasting', hour: 7, minute: 0, dosage: 'قرص واحد', notes: 'لحموضة المعدة', critical: false },
+            { id: 'med-corvid', name: 'Corvid', time: 'morning-fasting', hour: 7, minute: 0, dosage: 'نصف قرص', notes: 'لضغط الدم والقلب', critical: false },
+            
+            // بعد الفطار - 9:00 صباحاً
+            { id: 'med-aldomet-1', name: 'Aldomet', time: 'after-breakfast', hour: 9, minute: 0, dosage: 'قرصين', notes: 'الجرعة الأولى - سيتم تكرارها كل 8 ساعات', critical: false },
+            { id: 'med-eliquis-morning', name: 'Eliquis', time: 'after-breakfast', hour: 9, minute: 0, dosage: 'قرص واحد', notes: 'مميع للدم - الجرعة الصباحية', critical: true },
+            { id: 'med-acetyl-morning', name: 'Acetyl Cysteine', time: 'after-breakfast', hour: 9, minute: 0, dosage: 'كيس واحد', notes: 'مذيب للبلغم - الجرعة الصباحية', critical: false },
+            
+            // قبل الغداء - 1:00 ظهراً
+            { id: 'med-forxiga', name: 'Forxiga', time: 'before-lunch', hour: 13, minute: 0, dosage: 'قرص واحد', notes: 'لسكري النوع الثاني - اشرب مياه كافية', critical: false },
+            
+            // بعد الغداء - 3:00 عصراً
+            { id: 'med-suprax', name: 'Suprax', time: 'after-lunch', hour: 15, minute: 0, dosage: 'قرص واحد', notes: 'مضاد حيوي - لمدة أسبوع فقط', critical: false },
+            { id: 'med-suprax-susp', name: 'Suprax Suspension', time: 'after-lunch', hour: 15, minute: 0, dosage: '٣ سم', notes: 'بعد الغداء - لمدة أسبوع', critical: false },
+            
+            // العصر - 5:00 عصراً
+            { id: 'med-eraloner', name: 'Eraloner', time: 'afternoon', hour: 17, minute: 0, dosage: 'قرص واحد', notes: 'مضاد للاكتئاب/القلق', critical: false },
+            { id: 'med-aldomet-2', name: 'Aldomet', time: 'afternoon', hour: 17, minute: 0, dosage: 'قرصين', notes: 'جرعة منتصف اليوم', critical: false },
+            
+            // الساعة 6 مساءً
+            { id: 'med-cardura', name: 'Cardura', time: '6pm', hour: 18, minute: 0, dosage: 'قرص واحد', notes: 'لضغط الدم', critical: false },
+            
+            // بعد العشاء - 8:00 مساءً
+            { id: 'med-plavix', name: 'Plavix', time: 'after-dinner', hour: 20, minute: 0, dosage: 'قرص واحد', notes: 'مميع للدم - مع Eliquis', critical: true },
+            { id: 'med-lipitor', name: 'Lipitor', time: 'after-dinner', hour: 20, minute: 0, dosage: 'قرص واحد', notes: 'لخفض الكوليسترول', critical: false },
+            { id: 'med-moxiflox', name: 'Moxiflox', time: 'after-dinner', hour: 20, minute: 0, dosage: 'قرص واحد', notes: 'مرة كل 24 ساعة - بعيد عن اللبن', critical: true },
+            { id: 'med-spiriva', name: 'Spiriva', time: 'after-dinner', hour: 20, minute: 0, dosage: 'بخة واحدة', notes: 'بخاخة استنشاق', critical: false },
+            
+            // قبل النوم - 10:00 مساءً
+            { id: 'med-eliquis-night', name: 'Eliquis', time: 'before-bed', hour: 22, minute: 0, dosage: 'قرص واحد', notes: 'الجرعة المسائية', critical: true },
+            { id: 'med-aldomet-3', name: 'Aldomet', time: 'before-bed', hour: 22, minute: 0, dosage: 'قرصين', notes: 'الجرعة الثالثة والأخيرة', critical: false },
+            { id: 'med-acetyl-night', name: 'Acetyl Cysteine', time: 'before-bed', hour: 22, minute: 0, dosage: 'كيس واحد', notes: 'مذيب للبلغم - الجرعة المسائية', critical: false }
         ];
+        
+        // مجموعات الأدوية للإشعارات الجماعية
+        const medicationGroups = {
+            'morning-fasting': {
+                name: 'أدوية الصباح على الريق',
+                medications: ['Examide', 'Norvasc', 'Contorloc', 'Corvid']
+            },
+            'after-breakfast': {
+                name: 'أدوية بعد الفطار',
+                medications: ['Aldomet', 'Eliquis', 'Acetyl Cysteine']
+            },
+            'before-lunch': {
+                name: 'أدوية قبل الغداء',
+                medications: ['Forxiga']
+            },
+            'after-lunch': {
+                name: 'أدوية بعد الغداء',
+                medications: ['Suprax', 'Suprax Suspension']
+            },
+            'afternoon': {
+                name: 'أدوية العصر',
+                medications: ['Eraloner', 'Aldomet']
+            },
+            '6pm': {
+                name: 'أدوية الساعة 6 مساءً',
+                medications: ['Cardura']
+            },
+            'after-dinner': {
+                name: 'أدوية بعد العشاء',
+                medications: ['Plavix', 'Lipitor', 'Moxiflox', 'Spiriva']
+            },
+            'before-bed': {
+                name: 'أدوية قبل النوم',
+                medications: ['Eliquis', 'Aldomet', 'Acetyl Cysteine']
+            }
+        };
         
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1224,8 +1616,8 @@
                 applyAnimations();
                 loadCaregiverToken();
                 
-                console.log('✅ نظام المريض جاهز للاستخدام مع Firebase');
-                showNotification('مرحباً', 'النظام جاهز ومتصل بـ Firebase', 'success');
+                console.log('✅ نظام المريض جاهز للاستخدام مع جميع الأدوية');
+                showNotification('مرحباً', 'النظام جاهز مع جدول الأدوية الكامل', 'success');
             } catch (error) {
                 console.error('❌ خطأ في تهيئة التطبيق:', error);
                 showNotification('خطأ في التهيئة', 'تعذر تحميل التطبيق بشكل صحيح', 'error');
@@ -1235,28 +1627,20 @@
         // تهيئة Firebase
         async function initializeFirebase() {
             try {
-                // تحديث حالة الاتصال
                 updateFirebaseStatus('جاري الاتصال بـ Firebase...', 'disconnected');
                 
-                // التحقق من دعم FCM
                 if (!firebase.messaging.isSupported()) {
                     throw new Error('المتصفح لا يدعم الإشعارات');
                 }
                 
                 messaging = firebase.messaging();
                 
-                // تحديث حالة الاتصال
-                updateFirebaseStatus('متصل بـ Firebase', 'connected');
-                appData.firebaseConnected = true;
-                
-                // طلب إذن الإشعارات
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') {
                     console.warn('⚠️ تم رفض إذن الإشعارات');
                     showNotification('تنبيه', 'يجب تفعيل الإشعارات لتلقي التذكيرات', 'warning');
                 }
                 
-                // الحصول على رمز FCM
                 const token = await messaging.getToken({
                     vapidKey: 'BAHsKe2WSUDaXMcroeNScTprRmE2NTIBDyv9fYmVsuUddhERvybIKM7EBNgSHnuZ91Q9QU9V034IXnVDbeEG9oQ'
                 });
@@ -1269,14 +1653,15 @@
                     document.getElementById('notification-status').textContent = 'جاهز';
                     document.getElementById('notification-status').style.color = 'green';
                     
-                    // حفظ Token في Firestore
                     await savePatientToken(token);
                     
-                    console.log('✅ تم الحصول على رمز FCM:', shortToken);
+                    console.log('✅ تم الحصول على رمز FCM');
+                    updateFirebaseStatus('متصل بـ Firebase', 'connected');
+                    appData.firebaseConnected = true;
+                    
                     showNotification('تم التهيئة', 'تم تفعيل الإشعارات بنجاح!', 'success');
                 }
                 
-                // إعداد مستمعي FCM
                 setupFirebaseListeners();
                 
             } catch (error) {
@@ -1287,30 +1672,7 @@
             }
         }
         
-        // إعداد مستمعي Firebase
-        function setupFirebaseListeners() {
-            // مستمع للإشعارات الواردة
-            messaging.onMessage((payload) => {
-                console.log('📱 إشعار ورد:', payload);
-                showNotification(payload.notification?.title || 'إشعار جديد', 
-                    payload.notification?.body || 'لديك إشعار جديد', 'success');
-            });
-            
-            // مستمع لانقطاع الاتصال
-            db.enableNetwork().then(() => {
-                console.log('✅ اتصال Firestore نشط');
-            }).catch((error) => {
-                console.error('❌ خطأ في اتصال Firestore:', error);
-                updateFirebaseStatus('اتصال محدود', 'disconnected');
-            });
-            
-            // مراقبة حالة الاتصال
-            firebase.firestore().disableNetwork().then(() => {
-                firebase.firestore().enableNetwork();
-            });
-        }
-        
-        // حفظ رمز المريض في Firestore
+        // حفظ رمز المريض في Firebase
         async function savePatientToken(token) {
             try {
                 await db.collection('patients').doc(appData.patientId).set({
@@ -1319,7 +1681,14 @@
                     fcmToken: token,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                     totalMedications: allMedications.length,
-                    medicationsTakenToday: Object.keys(appData.medications).length
+                    medicationsTakenToday: Object.keys(appData.medications).length,
+                    medicationSchedule: allMedications.map(med => ({
+                        name: med.name,
+                        time: med.time,
+                        hour: med.hour,
+                        minute: med.minute,
+                        critical: med.critical
+                    }))
                 }, { merge: true });
                 
                 console.log('✅ تم حفظ بيانات المريض في Firestore');
@@ -1342,21 +1711,73 @@
                     fcmToken: appData.fcmToken
                 };
                 
-                // حفظ الحدث في Firestore
                 await db.collection('medication_events').add(eventData);
                 
                 console.log(`✅ تم إرسال إشعار أخذ ${medication} إلى Firebase`);
                 
-                // تحديث إحصائيات المريض
                 await updatePatientStatistics();
                 
-                // إرسال إشعار مباشر إذا كان هناك رمز لمقدم الرعاية
                 if (appData.caregiverToken) {
                     await sendDirectNotificationToCaregiver(medication, time);
                 }
                 
             } catch (error) {
                 console.error('❌ خطأ في إرسال إشعار أخذ الدواء:', error);
+            }
+        }
+        
+        // إرسال إشعار جماعي عن مجموعة أدوية
+        async function sendGroupNotification(groupTime) {
+            const group = medicationGroups[groupTime];
+            if (!group) return;
+            
+            try {
+                const currentTime = new Date().toLocaleTimeString('ar-EG');
+                const groupMedications = group.medications.join('، ');
+                
+                const eventData = {
+                    patientId: appData.patientId,
+                    patientName: appData.patientName,
+                    medication: `مجموعة ${group.name}`,
+                    medications: group.medications,
+                    time: currentTime,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    type: 'group_notification',
+                    groupName: group.name,
+                    caregiverNotified: false
+                };
+                
+                await db.collection('medication_events').add(eventData);
+                
+                console.log(`✅ تم إرسال إشعار جماعي عن ${group.name}`);
+                
+                showNotification('تم الإرسال', `تم إرسال إشعار عن ${group.name} للمراقب`, 'success');
+                
+                if (appData.caregiverToken) {
+                    await fetch('https://us-central1-medtrackmamdouh.cloudfunctions.net/sendNotification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: appData.caregiverToken,
+                            notification: {
+                                title: `📋 ${group.name}`,
+                                body: `${appData.patientName}: حان وقت ${group.name}: ${groupMedications}`
+                            },
+                            data: {
+                                patientId: appData.patientId,
+                                patientName: appData.patientName,
+                                group: group.name,
+                                medications: groupMedications,
+                                time: currentTime,
+                                type: 'group_notification'
+                            }
+                        })
+                    });
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ في إرسال إشعار جماعي:', error);
+                showNotification('خطأ', 'تعذر إرسال الإشعار الجماعي', 'error');
             }
         }
         
@@ -1376,7 +1797,6 @@
         // إرسال إشعار مباشر إلى مقدم الرعاية
         async function sendDirectNotificationToCaregiver(medication, time) {
             try {
-                // استخدام Cloud Functions لإرسال الإشعار
                 const response = await fetch('https://us-central1-medtrackmamdouh.cloudfunctions.net/sendNotification', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1495,7 +1915,6 @@
                 showSaveIndicator();
                 updateLastSaveTime();
                 
-                // تحديث Firestore إذا كان متصلاً
                 if (appData.firebaseConnected) {
                     savePatientToken(appData.fcmToken);
                 }
@@ -1723,18 +2142,12 @@
             const takenMeds = Object.keys(appData.medications).length;
             const remainingMeds = totalMeds - takenMeds;
             const progressPercent = (takenMeds / totalMeds) * 100;
+            const compliancePercent = Math.round(progressPercent);
             
-            const takenCountEl = document.getElementById('taken-count');
-            if (takenCountEl) takenCountEl.textContent = takenMeds;
-            
-            const remainingCountEl = document.getElementById('remaining-count');
-            if (remainingCountEl) remainingCountEl.textContent = remainingMeds;
-            
-            const takenDisplayEl = document.getElementById('taken-count-display');
-            if (takenDisplayEl) takenDisplayEl.textContent = takenMeds;
-            
-            const remainingDisplayEl = document.getElementById('remaining-count-display');
-            if (remainingDisplayEl) remainingDisplayEl.textContent = remainingMeds;
+            document.getElementById('taken-count').textContent = takenMeds;
+            document.getElementById('taken-count-display').textContent = takenMeds;
+            document.getElementById('total-count-display').textContent = totalMeds;
+            document.getElementById('compliance-percent').textContent = compliancePercent + '%';
             
             const progressFillEl = document.getElementById('progress-fill');
             if (progressFillEl) progressFillEl.style.width = `${progressPercent}%`;
@@ -1802,13 +2215,7 @@
         
         // تحديث التذكيرات
         function updateReminders() {
-            updateTodayNotifications();
             updateNextReminder();
-        }
-        
-        // تحديث إشعارات اليوم
-        function updateTodayNotifications() {
-            // يتم تحديثها من خلال Firebase
         }
         
         // تحديث التذكير القادم
@@ -1817,24 +2224,18 @@
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             
-            const timeSlots = [
-                { time: "morning-fasting", hour: 7, minute: 0, name: "الصباح على الريق" },
-                { time: "after-breakfast", hour: 9, minute: 0, name: "بعد الفطار" },
-                { time: "before-bed", hour: 22, minute: 0, name: "قبل النوم" }
-            ];
-            
             let nextReminder = null;
-            timeSlots.forEach(timeSlot => {
-                if (timeSlot.hour > currentHour || (timeSlot.hour === currentHour && timeSlot.minute > currentMinute)) {
-                    const medsInSlot = allMedications.filter(med => med.time === timeSlot.time);
-                    const hasUntakenMeds = medsInSlot.some(med => {
-                        const medKey = `${med.name}-${timeSlot.time}`;
-                        return !appData.medications[medKey];
-                    });
-                    
-                    if (hasUntakenMeds && (!nextReminder || timeSlot.hour < nextReminder.hour || 
-                        (timeSlot.hour === nextReminder.hour && timeSlot.minute < nextReminder.minute))) {
-                        nextReminder = timeSlot;
+            let nextMedication = null;
+            
+            allMedications.forEach(med => {
+                if (med.hour > currentHour || (med.hour === currentHour && med.minute > currentMinute)) {
+                    const medKey = `${med.name}-${med.time}`;
+                    if (!appData.medications[medKey]) {
+                        if (!nextReminder || med.hour < nextReminder.hour || 
+                            (med.hour === nextReminder.hour && med.minute < nextReminder.minute)) {
+                            nextReminder = med;
+                            nextMedication = med.name;
+                        }
                     }
                 }
             });
@@ -1843,7 +2244,7 @@
             if (nextReminder) {
                 const timeString = `${nextReminder.hour}:${nextReminder.minute.toString().padStart(2, '0')}`;
                 document.getElementById('next-reminder-time').textContent = timeString;
-                document.getElementById('next-reminder-med').textContent = nextReminder.name;
+                document.getElementById('next-reminder-med').textContent = nextMedication;
                 reminderElement.style.display = 'block';
             } else {
                 reminderElement.style.display = 'none';
@@ -1950,80 +2351,56 @@
                 return appData.medications[medKey];
             });
             
-            let summary = "حالتك الصحية مستقرة نسبياً";
+            let summary = "حالتك الصحية تحت السيطرة";
             let detailedAnalysis = "";
             const recommendations = [];
             const warnings = [];
             const positivePoints = [];
             
+            // تحليل الأدوية الحرجة
+            const criticalMedications = ["Eliquis", "Plavix"];
+            const takenCritical = criticalMedications.filter(med => {
+                return allMedications.some(m => 
+                    m.name === med && appData.medications[`${m.name}-${m.time}`]
+                );
+            });
+            
+            if (takenCritical.length === criticalMedications.length) {
+                positivePoints.push("تم تناول جميع الأدوية الحرجة (Eliquis و Plavix) وهذا ضروري للغاية");
+                detailedAnalysis += "الالتزام بالأدوية المميعة للدم ممتاز، مما يقلل خطر الجلطات.";
+            } else if (takenCritical.length > 0) {
+                warnings.push("بعض الأدوية المميعة للدم لم تؤخذ بعد. هذه أدوية حرجة!");
+                detailedAnalysis += "بعض الأدوية المميعة للدم مفقودة. هذا خطر كبير.";
+            }
+            
+            // تحليل نسبة الالتزام العامة
             if (medicationProgress >= 90) {
-                positivePoints.push("التزام ممتاز بتناول الأدوية بنسبة " + medicationProgress + "%");
-                detailedAnalysis += "مستوى الالتزام بالأدوية ممتاز، مما يساهم في استقرار الحالة الصحية.";
+                positivePoints.push("التزام ممتاز بالأدوية بنسبة " + medicationProgress + "%");
+                detailedAnalysis += "مستوى الالتزام العام بالأدوية ممتاز جداً.";
             } else if (medicationProgress >= 70) {
-                detailedAnalysis += "مستوى الالتزام بالأدوية جيد، ولكن يمكن تحسينه للمساعدة في استقرار الحالة الصحية.";
-                recommendations.push("حاول الالتزام بجميع الأدوية المقررة لتحقيق أفضل نتائج علاجية");
+                detailedAnalysis += "مستوى الالتزام جيد ولكن يمكن تحسينه.";
+                recommendations.push("حاول الالتزام بجميع الأدوية المقررة");
             } else {
-                detailedAnalysis += "مستوى الالتزام بالأدوية يحتاج لتحسين، حيث أن بعض الأدوية المهمة قد فات موعدها.";
-                warnings.push("انخفاض مستوى الالتزام بالأدوية قد يؤثر سلباً على الحالة الصحية");
-                recommendations.push("تذكير: الأدوية المميّعة للدم (Eliquis) يجب تناولها بانتظام لتجنب المخاطر");
+                summary = "انخفاض في الالتزام بالأدوية";
+                detailedAnalysis += "مستوى الالتزام منخفض (" + medicationProgress + "%) ويحتاج تحسين عاجل.";
+                warnings.push("انخفاض الالتزام بالأدوية قد يؤثر سلباً على الحالة الصحية");
             }
             
-            if (takenCriticalMeds.length === criticalMeds.length) {
-                positivePoints.push("تم تناول جميع الأدوية الحرجة (Eliquis) وهذا جيد للغاية");
-            } else {
-                warnings.push("بعض الأدوية الحرجة لم تؤخذ بعد. هذه الأدوية مهمة للغاية للوقاية من الجلطات");
-            }
-            
+            // تحليل الأعراض والألم
             if (report.painLevel >= 3) {
-                summary = "هناك ارتفاع في مستوى الألم";
+                summary = "ارتفاع في مستوى الألم يحتاج متابعة";
                 detailedAnalysis += " مستوى الألم مرتفع (" + report.painLevel + "/4)، مما قد يؤثر على جودة الحياة.";
-                recommendations.push("تحدث مع طبيبك حول إدارة الألم إذا استمر المستوى الحالي");
-            } else if (report.painLevel > 0) {
-                detailedAnalysis += " مستوى الألم مقبول ولكن يحتاج للمراقبة.";
-            } else {
-                positivePoints.push("لا توجد آلام تُذكر، وهذا مؤشر إيجابي");
+                recommendations.push("تحدث مع طبيبك حول خطة إدارة الألم");
             }
             
-            if (report.sleepQuality === "سيء") {
-                detailedAnalysis += " جودة النوم غير جيدة، مما قد يؤثر على مستوى الطاقة والصحة العامة.";
-                recommendations.push("جرب تقنيات الاسترخاء قبل النوم وتحسين بيئة النوم");
-            } else if (report.sleepQuality === "جيد") {
-                positivePoints.push("نوعية النوم جيدة، وهذا يساعد في التعافي وتحسين المناعة");
+            if (report.symptoms.includes("ضيق تنفس") || report.symptoms.includes("آلام في الصدر")) {
+                warnings.push("أعراض مثل ضيق التنفس أو آلام الصدر تتطلب مراجعة طبية فورية");
             }
             
-            if (report.appetite === "ضعيفة") {
-                detailedAnalysis += " الشهية منخفضة، مما قد يؤثر على التغذية والطاقة.";
-                recommendations.push("حاول تقسيم الوجبات إلى وجبات صغيرة متكررة لتشجيع الأكل");
-            } else if (report.appetite === "جيدة") {
-                positivePoints.push("الشهية جيدة، مما يدعم الصحة العامة والتغذية السليمة");
-            }
-            
-            if (report.symptoms.length > 0) {
-                const symptomText = report.symptoms.join("، ");
-                detailedAnalysis += " تم الإبلاغ عن الأعراض التالية: " + symptomText + ".";
-                
-                if (report.symptoms.includes("آلام في الصدر") || report.symptoms.includes("ضيق تنفس")) {
-                    warnings.push("أعراض مثل آلام الصدر أو ضيق التنفس تتطلب مراجعة طبية فورية");
-                }
-                
-                if (report.symptoms.includes("دوخة")) {
-                    recommendations.push("عند الشعور بالدوخة، اجلس أو استلقِ فوراً لتجنب السقوط");
-                }
-            }
-            
-            if (report.healthRating <= 2) {
-                summary = "هناك انخفاض ملحوظ في الصحة العامة";
-                detailedAnalysis += " التقييم الذاتي منخفض (" + report.healthRating + "/5)، مما يدل على حاجة لاهتمام إضافي.";
-                recommendations.push("ناقش هذه المشاعر مع طبيبك في أقرب وقت ممكن");
-            } else if (report.healthRating >= 4) {
-                positivePoints.push("التقييم الذاتي للصحة جيد جداً (" + report.healthRating + "/5)");
-            }
-            
-            if (!recommendations.length) {
-                recommendations.push("استمر في متابعة نظام الأدوية والصحة اليومي");
-                recommendations.push("مارس نشاطاً بدنياً خفيفاً إن أمكن لتحسين الدورة الدموية");
-                recommendations.push("اشرب كمية كافية من الماء طوال اليوم");
-            }
+            // توصيات عامة
+            recommendations.push("اشرب كمية كافية من الماء خاصة مع Forxiga");
+            recommendations.push("تجنب منتجات الألبان مع Moxiflox بساعتين على الأقل");
+            recommendations.push("راجع الطبيب فوراً عند حدوث أي نزيف مع Eliquis و Plavix");
             
             return {
                 summary: summary,
@@ -2031,15 +2408,13 @@
                 recommendations: recommendations,
                 warnings: warnings,
                 positivePoints: positivePoints,
-                medicationProgress: medicationProgress,
-                painLevel: report.painLevel,
-                healthRating: report.healthRating,
-                generatedAt: new Date().toISOString()
+                medicationProgress: medicationProgress
             };
         }
         
         // تهيئة الأزرار
         function initButtons() {
+            // أزرار التحكم الرئيسية
             document.getElementById('reset-day').addEventListener('click', resetDay);
             document.getElementById('save-data').addEventListener('click', manualSaveData);
             document.getElementById('mark-all-taken').addEventListener('click', markAllTaken);
@@ -2051,6 +2426,18 @@
             document.getElementById('setup-notifications').addEventListener('click', setupNotifications);
             document.getElementById('save-caregiver-token').addEventListener('click', saveCaregiverToken);
             
+            // أزرار الإشعارات الجماعية
+            document.querySelectorAll('.send-notification-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const groupTime = this.getAttribute('data-time');
+                    const groupName = this.getAttribute('data-group');
+                    if (confirm(`هل تريد إرسال إشعار للمراقب عن ${groupName}؟`)) {
+                        sendGroupNotification(groupTime);
+                    }
+                });
+            });
+            
+            // تحديث معلومات المريض
             document.getElementById('patient-name-input').addEventListener('change', function() {
                 appData.patientName = this.value;
                 document.getElementById('patient-name').textContent = this.value;
@@ -2074,7 +2461,7 @@
                 appData.caregiverToken = token;
                 localStorage.setItem('caregiverToken', token);
                 showNotification('تم الحفظ', 'تم حفظ رمز مقدم الرعاية بنجاح', 'success');
-                console.log('✅ تم حفظ رمز مقدم الرعاية:', token.substring(0, 30) + '...');
+                console.log('✅ تم حفظ رمز مقدم الرعاية');
             } else {
                 showNotification('تنبيه', 'الرجاء إدخال رمز مقدم الرعاية', 'warning');
             }
@@ -2186,8 +2573,9 @@
             const exportDataObj = {
                 ...appData,
                 exportDate: new Date().toISOString(),
-                exportVersion: '2.0',
-                firebaseProject: 'medtrackmamdouh'
+                exportVersion: '3.0',
+                firebaseProject: 'medtrackmamdouh',
+                medicationSchedule: allMedications
             };
             
             const dataStr = JSON.stringify(exportDataObj, null, 2);
@@ -2248,7 +2636,6 @@
                 updateFirebaseStatus('متصل بـ Firebase', 'connected');
             }
         }, 30000);
-        
     </script>
 </body>
 </html>
